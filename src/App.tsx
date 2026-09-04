@@ -203,6 +203,7 @@ function SidebarNav({ title, items }: { title: string; items: NavItem[] }) {
 }
 
 function DashboardLayout({ role, onLogout, children }: { role: UserRole; onLogout: () => void; children: ReactNode }) {
+  const location = useLocation()
   const customerItems: NavItem[] = [
     { to: '/customer', label: 'Dashboard', icon: <Home className="h-4 w-4" /> },
     { to: '/customer/vehicles', label: 'Vehicles', icon: <Car className="h-4 w-4" /> },
@@ -224,16 +225,20 @@ function DashboardLayout({ role, onLogout, children }: { role: UserRole; onLogou
     { to: '/inventory-os/dealers', label: 'Dealers', icon: <Users className="h-4 w-4" /> },
     { to: '/inventory-os/reports', label: 'Reports', icon: <Gauge className="h-4 w-4" /> },
   ]
-  if (role === 'admin') {
-    inventoryItems.push({ to: '/admin/bulk-upload', label: 'Bulk Upload', icon: <UploadMark /> })
-  }
+  const adminItems: NavItem[] = [
+    { to: '/admin/bulk-upload', label: 'Bulk Upload', icon: <UploadMark /> },
+    { to: '/inventory-os', label: 'Open Inventory OS', icon: <HardDriveUpload className="h-4 w-4" /> },
+  ]
 
   const isCustomer = role === 'customer'
+  const isAdminWorkspace = role === 'admin' && location.pathname.startsWith('/admin')
+  const navItems = isCustomer ? customerItems : isAdminWorkspace ? adminItems : inventoryItems
+  const navTitle = isCustomer ? 'Customer Portal' : isAdminWorkspace ? 'Admin Center' : 'Inventory OS'
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[240px_1fr]">
         <div className="hidden lg:block">
-          <SidebarNav title={isCustomer ? 'Customer Portal' : 'Inventory OS'} items={isCustomer ? customerItems : inventoryItems} />
+          <SidebarNav title={navTitle} items={navItems} />
         </div>
         <div>
           <TopBar role={role} onLogout={onLogout} />
@@ -960,7 +965,7 @@ function LoginPage({ onLogin }: { onLogin: (role: UserRole) => void }) {
       return
     }
     onLogin(account.role)
-    navigate(account.role === 'customer' ? '/customer' : '/inventory-os')
+    navigate(account.role === 'customer' ? '/customer' : account.role === 'admin' ? '/admin/bulk-upload' : '/inventory-os')
   }
 
   return (

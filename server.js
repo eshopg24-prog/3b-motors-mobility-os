@@ -16,8 +16,16 @@ const fallbackLimiter = rateLimit({
 })
 
 app.use(express.static(path.join(__dirname, 'dist')))
-app.use(fallbackLimiter, (_, res) => {
+app.get(/.*/, fallbackLimiter, (req, res, next) => {
+  if (path.extname(req.path) || !req.accepts('html')) {
+    next()
+    return
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+})
+
+app.use((_, res) => {
+  res.status(404).json({ error: 'Not found' })
 })
 
 app.listen(port, () => {
