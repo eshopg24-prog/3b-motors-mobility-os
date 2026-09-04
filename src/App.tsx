@@ -22,7 +22,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react'
-import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import {
   brands,
   categories,
@@ -919,87 +919,80 @@ function LoginHint() {
   )
 }
 
+function CustomerShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+  return (
+    <RequireRole role={role} allowed={['customer']}>
+      <DashboardLayout role={role} setRole={setRole}>
+        <Outlet />
+      </DashboardLayout>
+    </RequireRole>
+  )
+}
+
+function InventoryShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+  return (
+    <RequireRole role={role} allowed={['inventory_manager', 'admin']}>
+      <DashboardLayout role={role} setRole={setRole}>
+        <Outlet />
+      </DashboardLayout>
+    </RequireRole>
+  )
+}
+
+function AdminShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+  return (
+    <RequireRole role={role} allowed={['inventory_manager', 'admin']}>
+      <DashboardLayout role={role} setRole={setRole}>
+        <Outlet />
+      </DashboardLayout>
+    </RequireRole>
+  )
+}
+
 function App() {
   const [role, setRole] = useState<UserRole>('public')
 
   return (
     <Routes>
-      <Route
-        path="/*"
-        element={
-          <PublicLayout role={role} setRole={setRole}>
-            <Routes>
-              <Route path="/" element={<PublicHomePage />} />
-              <Route path="/vehicles" element={<PublicSimplePage title="Vehicle Catalog" body="Explore motorcycles, EV motorcycles, electric cars, and three wheelers with brand-level filtering." />} />
-              <Route path="/parts" element={<PublicSimplePage title="Spare Parts" body="Shop tyres, batteries, controllers, and genuine brand parts with quote and service CTAs." />} />
-              <Route path="/electric-mobility" element={<PublicSimplePage title="Electric Mobility" body="Discover EV lineup, battery programs, charging readiness, and fleet electrification advisory." />} />
-              <Route path="/services" element={<PublicSimplePage title="Services" body="Book maintenance, preventive checks, and emergency support from certified 3B service centers." />} />
-              <Route path="/dealers" element={<DealerManagementPage />} />
-              <Route path="/about" element={<PublicSimplePage title="About 3B Motors" body="3B Motors delivers enterprise-grade mobility solutions across Ethiopia with integrated operations." />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="*" element={<PublicSimplePage title="Not Found" body="The page you requested does not exist." />} />
-            </Routes>
-          </PublicLayout>
-        }
-      />
+      <Route path="/" element={<PublicLayout role={role} setRole={setRole}><PublicHomePage /></PublicLayout>} />
+      <Route path="/vehicles" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Vehicle Catalog" body="Explore motorcycles, EV motorcycles, electric cars, and three wheelers with brand-level filtering." /></PublicLayout>} />
+      <Route path="/parts" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Spare Parts" body="Shop tyres, batteries, controllers, and genuine brand parts with quote and service CTAs." /></PublicLayout>} />
+      <Route path="/electric-mobility" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Electric Mobility" body="Discover EV lineup, battery programs, charging readiness, and fleet electrification advisory." /></PublicLayout>} />
+      <Route path="/services" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Services" body="Book maintenance, preventive checks, and emergency support from certified 3B service centers." /></PublicLayout>} />
+      <Route path="/dealers" element={<PublicLayout role={role} setRole={setRole}><DealerManagementPage /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="About 3B Motors" body="3B Motors delivers enterprise-grade mobility solutions across Ethiopia with integrated operations." /></PublicLayout>} />
+      <Route path="/contact" element={<PublicLayout role={role} setRole={setRole}><ContactPage /></PublicLayout>} />
 
-      <Route
-        path="/customer/*"
-        element={
-          <RequireRole role={role} allowed={['customer']}>
-            <DashboardLayout role={role} setRole={setRole}>
-              <Routes>
-                <Route path="/" element={<CustomerDashboard />} />
-                <Route path="/vehicles" element={<CustomerSimpleDataPage title="My Vehicles" icon={<Car className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/orders" element={<CustomerSimpleDataPage title="Orders" icon={<Package className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/bookings" element={<CustomerBookingsPage />} />
-                <Route path="/service-history" element={<CustomerSimpleDataPage title="Service History" icon={<Wrench className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/quotes" element={<CustomerQuotesPage />} />
-                <Route path="/payments" element={<CustomerSimpleDataPage title="Payments" icon={<Wallet className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/wishlist" element={<CustomerSimpleDataPage title="Wishlist" icon={<Zap className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/messages" element={<CustomerSimpleDataPage title="Messages" icon={<MessageSquare className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="/settings" element={<CustomerSimpleDataPage title="Account Settings" icon={<Settings className="h-5 w-5 text-blue-300" />} />} />
-                <Route path="*" element={<LoginHint />} />
-              </Routes>
-            </DashboardLayout>
-          </RequireRole>
-        }
-      />
+      <Route path="/customer" element={<CustomerShell role={role} setRole={setRole} />}>
+        <Route index element={<CustomerDashboard />} />
+        <Route path="vehicles" element={<CustomerSimpleDataPage title="My Vehicles" icon={<Car className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="orders" element={<CustomerSimpleDataPage title="Orders" icon={<Package className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="bookings" element={<CustomerBookingsPage />} />
+        <Route path="service-history" element={<CustomerSimpleDataPage title="Service History" icon={<Wrench className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="quotes" element={<CustomerQuotesPage />} />
+        <Route path="payments" element={<CustomerSimpleDataPage title="Payments" icon={<Wallet className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="wishlist" element={<CustomerSimpleDataPage title="Wishlist" icon={<Zap className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="messages" element={<CustomerSimpleDataPage title="Messages" icon={<MessageSquare className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="settings" element={<CustomerSimpleDataPage title="Account Settings" icon={<Settings className="h-5 w-5 text-blue-300" />} />} />
+        <Route path="*" element={<LoginHint />} />
+      </Route>
 
-      <Route
-        path="/inventory-os/*"
-        element={
-          <RequireRole role={role} allowed={['inventory_manager', 'admin']}>
-            <DashboardLayout role={role} setRole={setRole}>
-              <Routes>
-                <Route path="/" element={<InventoryCommandCenterPage />} />
-                <Route path="/inventory" element={<InventoryListPage />} />
-                <Route path="/imports" element={<ImportsPage />} />
-                <Route path="/warehouses" element={<WarehousesPage />} />
-                <Route path="/dealers" element={<DealerManagementPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-                <Route path="*" element={<LoginHint />} />
-              </Routes>
-            </DashboardLayout>
-          </RequireRole>
-        }
-      />
+      <Route path="/inventory-os" element={<InventoryShell role={role} setRole={setRole} />}>
+        <Route index element={<InventoryCommandCenterPage />} />
+        <Route path="inventory" element={<InventoryListPage />} />
+        <Route path="imports" element={<ImportsPage />} />
+        <Route path="warehouses" element={<WarehousesPage />} />
+        <Route path="dealers" element={<DealerManagementPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="*" element={<LoginHint />} />
+      </Route>
 
-      <Route
-        path="/admin/*"
-        element={
-          <RequireRole role={role} allowed={['admin', 'inventory_manager']}>
-            <DashboardLayout role={role} setRole={setRole}>
-              <Routes>
-                <Route path="/bulk-upload" element={<BulkUploadPage />} />
-                <Route path="*" element={<LoginHint />} />
-              </Routes>
-            </DashboardLayout>
-          </RequireRole>
-        }
-      />
+      <Route path="/admin" element={<AdminShell role={role} setRole={setRole} />}>
+        <Route path="bulk-upload" element={<BulkUploadPage />} />
+        <Route path="*" element={<LoginHint />} />
+      </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Not Found" body="The page you requested does not exist." /></PublicLayout>} />
     </Routes>
   )
 }

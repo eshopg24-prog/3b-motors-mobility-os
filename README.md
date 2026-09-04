@@ -28,8 +28,11 @@ npm run start
 ```
 
 ## GoDaddy ZIP Deployment
-1. Run `npm run build`.
-2. Include `dist/`, `server.js`, `package.json`, and `package-lock.json` in deployment package.
-3. Upload ZIP to hosting environment and run `npm install --production`.
-4. Set environment variables from `.env.example`.
-5. Start app with `npm run start`.
+This project expects a Node.js hosting plan that supports long-running Express processes.
+
+1. Run `npm run build` locally.
+2. Create a ZIP containing: `dist/`, `server.js`, `package.json`, `package-lock.json`, and `.env.example`.
+3. Upload and extract the ZIP on the server.
+4. Run `npm install --omit=dev` on the server to install runtime dependencies.
+5. Configure environment variables using `.env.example`.
+6. Start the app with `npm run start`.
