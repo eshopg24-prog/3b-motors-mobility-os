@@ -181,6 +181,9 @@ function TopBar({ role, onLogout }: { role: UserRole; onLogout: () => void }) {
 
 function SidebarNav({ title, items }: { title: string; items: NavItem[] }) {
   const location = useLocation()
+  const isSectionRoot = (path: string) => ['/customer', '/inventory-os', '/admin'].includes(path)
+  const isActive = (path: string) =>
+    location.pathname === path || (isSectionRoot(path) && location.pathname.startsWith(`${path}/`))
   return (
     <aside className="h-full border-r border-white/10 bg-[#0D1117] p-3">
       <p className="mb-4 text-xs uppercase tracking-[0.2em] text-slate-400">{title}</p>
@@ -190,7 +193,7 @@ function SidebarNav({ title, items }: { title: string; items: NavItem[] }) {
             key={item.to}
             to={item.to}
             className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-              location.pathname === item.to ? 'bg-blue-500/20 text-blue-200' : 'text-slate-300 hover:bg-white/5'
+              isActive(item.to) ? 'bg-blue-500/20 text-blue-200' : 'text-slate-300 hover:bg-white/5'
             }`}
           >
             {item.icon}
@@ -293,7 +296,8 @@ function PublicLayout({ children, role, onLogout }: { children: ReactNode; role:
 }
 
 function RequireRole({ role, allowed, children }: { role: UserRole; allowed: UserRole[]; children: ReactNode }) {
-  if (!allowed.includes(role)) return <Navigate to="/" replace />
+  const location = useLocation()
+  if (!allowed.includes(role)) return <Navigate to="/login" replace state={{ from: location.pathname }} />
   return <>{children}</>
 }
 
@@ -946,6 +950,7 @@ function AdminShell({ role, onLogout }: { role: UserRole; onLogout: () => void }
 }
 
 function LoginPage({ onLogin }: { onLogin: (role: UserRole) => void }) {
+  const location = useLocation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -965,6 +970,12 @@ function LoginPage({ onLogin }: { onLogin: (role: UserRole) => void }) {
       return
     }
     onLogin(account.role)
+    const fromState = location.state as { from?: string } | null
+    const nextPath = fromState?.from
+    if (nextPath && nextPath.startsWith('/')) {
+      navigate(nextPath)
+      return
+    }
     navigate(account.role === 'customer' ? '/customer' : account.role === 'admin' ? '/admin/bulk-upload' : '/inventory-os')
   }
 
@@ -985,6 +996,7 @@ function LoginPage({ onLogin }: { onLogin: (role: UserRole) => void }) {
 function App() {
   const [role, setRole] = useState<UserRole>('public')
   const logout = () => setRole('public')
+  const loggedInRedirect = role === 'admin' ? '/admin/bulk-upload' : role === 'customer' ? '/customer' : role === 'inventory_manager' ? '/inventory-os' : '/'
 
   return (
     <Routes>
@@ -996,7 +1008,7 @@ function App() {
       <Route path="/dealers" element={<PublicLayout role={role} onLogout={logout}><DealerManagementPage /></PublicLayout>} />
       <Route path="/about" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="About 3B Motors" body="3B Motors delivers enterprise-grade mobility solutions across Ethiopia with integrated operations." /></PublicLayout>} />
       <Route path="/contact" element={<PublicLayout role={role} onLogout={logout}><ContactPage /></PublicLayout>} />
-      <Route path="/login" element={<PublicLayout role={role} onLogout={logout}><LoginPage onLogin={setRole} /></PublicLayout>} />
+      <Route path="/login" element={role === 'public' ? <PublicLayout role={role} onLogout={logout}><LoginPage onLogin={setRole} /></PublicLayout> : <Navigate to={loggedInRedirect} replace />} />
 
       <Route path="/customer" element={<CustomerShell role={role} onLogout={logout} />}>
         <Route index element={<CustomerDashboard />} />
