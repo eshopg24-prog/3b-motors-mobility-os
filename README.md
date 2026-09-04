@@ -31,7 +31,7 @@ npm run start
 This project expects a Node.js hosting plan that supports long-running Express processes.
 
 1. Run `npm run build` locally.
-2. Create a ZIP containing: `dist/`, `server.js`, `package.json`, `package-lock.json`, and `.env.example` (do not include `node_modules`).
+2. Create a ZIP containing: `dist/`, `server.js`, `package.json`, `.env.example`, and `package-lock.json` if present (do not include `node_modules`).
 3. Upload and extract the ZIP on the server.
 4. Run `npm install --omit=dev` on the server to install runtime dependencies after extraction (required before first start).
 5. Configure environment variables using `.env.example`.

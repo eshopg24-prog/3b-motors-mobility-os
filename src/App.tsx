@@ -162,7 +162,7 @@ function ErrorAlert({ message }: { message: string }) {
   )
 }
 
-function TopBar({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+function TopBar({ role, onLogout }: { role: UserRole; onLogout: () => void }) {
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-[#0A0A0F]/95 px-4 backdrop-blur">
       <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300">
@@ -170,16 +170,8 @@ function TopBar({ role, setRole }: { role: UserRole; setRole: (role: UserRole) =
         Search products, orders, imports
       </div>
       <div className="flex items-center gap-2">
-        <select
-          value={role}
-          onChange={(event) => setRole(event.target.value as UserRole)}
-          className="rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-sm text-slate-100"
-        >
-          <option value="public">Public</option>
-          <option value="customer">Customer</option>
-          <option value="inventory_manager">Inventory Manager</option>
-          <option value="admin">Admin</option>
-        </select>
+        <span className="rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-xs uppercase text-slate-200">{role}</span>
+        <button onClick={onLogout} className="rounded-lg border border-white/15 px-2 py-1 text-xs text-slate-200">Logout</button>
         <Bell className="h-5 w-5 text-slate-300" />
         <UserCircle2 className="h-6 w-6 text-slate-200" />
       </div>
@@ -210,7 +202,7 @@ function SidebarNav({ title, items }: { title: string; items: NavItem[] }) {
   )
 }
 
-function DashboardLayout({ role, setRole, children }: { role: UserRole; setRole: (role: UserRole) => void; children: ReactNode }) {
+function DashboardLayout({ role, onLogout, children }: { role: UserRole; onLogout: () => void; children: ReactNode }) {
   const customerItems: NavItem[] = [
     { to: '/customer', label: 'Dashboard', icon: <Home className="h-4 w-4" /> },
     { to: '/customer/vehicles', label: 'Vehicles', icon: <Car className="h-4 w-4" /> },
@@ -244,7 +236,7 @@ function DashboardLayout({ role, setRole, children }: { role: UserRole; setRole:
           <SidebarNav title={isCustomer ? 'Customer Portal' : 'Inventory OS'} items={isCustomer ? customerItems : inventoryItems} />
         </div>
         <div>
-          <TopBar role={role} setRole={setRole} />
+          <TopBar role={role} onLogout={onLogout} />
           <main className="space-y-4 p-4">{children}</main>
         </div>
       </div>
@@ -256,7 +248,7 @@ function UploadMark() {
   return <HardDriveUpload className="h-4 w-4" />
 }
 
-function PublicLayout({ children, role, setRole }: { children: ReactNode; role: UserRole; setRole: (role: UserRole) => void }) {
+function PublicLayout({ children, role, onLogout }: { children: ReactNode; role: UserRole; onLogout: () => void }) {
   const links = [
     ['/', 'Home'],
     ['/vehicles', 'Vehicles'],
@@ -278,16 +270,13 @@ function PublicLayout({ children, role, setRole }: { children: ReactNode; role: 
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value as UserRole)}
-              className="rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-xs text-slate-100"
-            >
-              <option value="public">Public</option>
-              <option value="customer">Customer</option>
-              <option value="inventory_manager">Inventory Manager</option>
-              <option value="admin">Admin</option>
-            </select>
+            {role === 'public' ? <Link to="/login" className="rounded-lg border border-white/15 px-3 py-1.5 text-xs">Login</Link> : null}
+            {role !== 'public' ? (
+              <>
+                <span className="rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-xs uppercase text-slate-100">{role}</span>
+                <button onClick={onLogout} className="rounded-lg border border-white/15 px-3 py-1.5 text-xs">Logout</button>
+              </>
+            ) : null}
             <Link to="/contact" className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold hover:bg-red-500">Contact Us</Link>
           </div>
         </div>
@@ -921,51 +910,90 @@ function LoginHint() {
   )
 }
 
-function CustomerShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+function CustomerShell({ role, onLogout }: { role: UserRole; onLogout: () => void }) {
   return (
     <RequireRole role={role} allowed={['customer']}>
-      <DashboardLayout role={role} setRole={setRole}>
+      <DashboardLayout role={role} onLogout={onLogout}>
         <Outlet />
       </DashboardLayout>
     </RequireRole>
   )
 }
 
-function InventoryShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+function InventoryShell({ role, onLogout }: { role: UserRole; onLogout: () => void }) {
   return (
     <RequireRole role={role} allowed={['inventory_manager', 'admin']}>
-      <DashboardLayout role={role} setRole={setRole}>
+      <DashboardLayout role={role} onLogout={onLogout}>
         <Outlet />
       </DashboardLayout>
     </RequireRole>
   )
 }
 
-function AdminShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
+function AdminShell({ role, onLogout }: { role: UserRole; onLogout: () => void }) {
   return (
     <RequireRole role={role} allowed={['admin']}>
-      <DashboardLayout role={role} setRole={setRole}>
+      <DashboardLayout role={role} onLogout={onLogout}>
         <Outlet />
       </DashboardLayout>
     </RequireRole>
+  )
+}
+
+function LoginPage({ onLogin }: { onLogin: (role: UserRole) => void }) {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+
+  const accounts: Record<string, { password: string; role: UserRole }> = {
+    daniel: { password: 'customer123', role: 'customer' },
+    meron: { password: 'inventory123', role: 'inventory_manager' },
+    admin: { password: 'admin123', role: 'admin' },
+  }
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const account = accounts[username.trim().toLowerCase()]
+    if (!account || account.password !== password) {
+      setError('Invalid credentials.')
+      return
+    }
+    onLogin(account.role)
+    navigate(account.role === 'customer' ? '/customer' : '/inventory-os')
+  }
+
+  return (
+    <section className="mx-auto max-w-md rounded-xl border border-white/10 bg-[#0D1117] p-6">
+      <h1 className="text-2xl font-bold">Workspace Login</h1>
+      <p className="mt-2 text-sm text-slate-400">Use demo accounts: daniel/customer123, meron/inventory123, admin/admin123.</p>
+      <form onSubmit={submit} className="mt-4 space-y-3">
+        <input value={username} onChange={(event) => setUsername(event.target.value)} required placeholder="Username" className="w-full rounded border border-white/15 bg-white/5 px-3 py-2" />
+        <input value={password} onChange={(event) => setPassword(event.target.value)} required type="password" placeholder="Password" className="w-full rounded border border-white/15 bg-white/5 px-3 py-2" />
+        <button type="submit" className="w-full rounded bg-red-600 px-3 py-2 font-semibold">Sign in</button>
+      </form>
+      {error ? <p className="mt-2 text-sm text-red-300">{error}</p> : null}
+    </section>
   )
 }
 
 function App() {
   const [role, setRole] = useState<UserRole>('public')
+  const logout = () => setRole('public')
 
   return (
     <Routes>
-      <Route path="/" element={<PublicLayout role={role} setRole={setRole}><PublicHomePage /></PublicLayout>} />
-      <Route path="/vehicles" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Vehicle Catalog" body="Explore motorcycles, EV motorcycles, electric cars, and three wheelers with brand-level filtering." /></PublicLayout>} />
-      <Route path="/parts" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Spare Parts" body="Shop tyres, batteries, controllers, and genuine brand parts with quote and service CTAs." /></PublicLayout>} />
-      <Route path="/electric-mobility" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Electric Mobility" body="Discover EV lineup, battery programs, charging readiness, and fleet electrification advisory." /></PublicLayout>} />
-      <Route path="/services" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Services" body="Book maintenance, preventive checks, and emergency support from certified 3B service centers." /></PublicLayout>} />
-      <Route path="/dealers" element={<PublicLayout role={role} setRole={setRole}><DealerManagementPage /></PublicLayout>} />
-      <Route path="/about" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="About 3B Motors" body="3B Motors delivers enterprise-grade mobility solutions across Ethiopia with integrated operations." /></PublicLayout>} />
-      <Route path="/contact" element={<PublicLayout role={role} setRole={setRole}><ContactPage /></PublicLayout>} />
+      <Route path="/" element={<PublicLayout role={role} onLogout={logout}><PublicHomePage /></PublicLayout>} />
+      <Route path="/vehicles" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="Vehicle Catalog" body="Explore motorcycles, EV motorcycles, electric cars, and three wheelers with brand-level filtering." /></PublicLayout>} />
+      <Route path="/parts" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="Spare Parts" body="Shop tyres, batteries, controllers, and genuine brand parts with quote and service CTAs." /></PublicLayout>} />
+      <Route path="/electric-mobility" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="Electric Mobility" body="Discover EV lineup, battery programs, charging readiness, and fleet electrification advisory." /></PublicLayout>} />
+      <Route path="/services" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="Services" body="Book maintenance, preventive checks, and emergency support from certified 3B service centers." /></PublicLayout>} />
+      <Route path="/dealers" element={<PublicLayout role={role} onLogout={logout}><DealerManagementPage /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="About 3B Motors" body="3B Motors delivers enterprise-grade mobility solutions across Ethiopia with integrated operations." /></PublicLayout>} />
+      <Route path="/contact" element={<PublicLayout role={role} onLogout={logout}><ContactPage /></PublicLayout>} />
+      <Route path="/login" element={<PublicLayout role={role} onLogout={logout}><LoginPage onLogin={setRole} /></PublicLayout>} />
 
-      <Route path="/customer" element={<CustomerShell role={role} setRole={setRole} />}>
+      <Route path="/customer" element={<CustomerShell role={role} onLogout={logout} />}>
         <Route index element={<CustomerDashboard />} />
         <Route path="vehicles" element={<CustomerSimpleDataPage title="My Vehicles" icon={<Car className="h-5 w-5 text-blue-300" />} />} />
         <Route path="orders" element={<CustomerSimpleDataPage title="Orders" icon={<Package className="h-5 w-5 text-blue-300" />} />} />
@@ -979,7 +1007,7 @@ function App() {
         <Route path="*" element={<LoginHint />} />
       </Route>
 
-      <Route path="/inventory-os" element={<InventoryShell role={role} setRole={setRole} />}>
+      <Route path="/inventory-os" element={<InventoryShell role={role} onLogout={logout} />}>
         <Route index element={<InventoryCommandCenterPage />} />
         <Route path="inventory" element={<InventoryListPage />} />
         <Route path="imports" element={<ImportsPage />} />
@@ -989,12 +1017,12 @@ function App() {
         <Route path="*" element={<LoginHint />} />
       </Route>
 
-      <Route path="/admin" element={<AdminShell role={role} setRole={setRole} />}>
+      <Route path="/admin" element={<AdminShell role={role} onLogout={logout} />}>
         <Route path="bulk-upload" element={<BulkUploadPage />} />
         <Route path="*" element={<LoginHint />} />
       </Route>
 
-      <Route path="*" element={<PublicLayout role={role} setRole={setRole}><PublicSimplePage title="Not Found" body="The page you requested does not exist." /></PublicLayout>} />
+      <Route path="*" element={<PublicLayout role={role} onLogout={logout}><PublicSimplePage title="Not Found" body="The page you requested does not exist." /></PublicLayout>} />
     </Routes>
   )
 }
