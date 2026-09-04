@@ -16,7 +16,7 @@ const fallbackLimiter = rateLimit({
 })
 
 app.use(express.static(path.join(__dirname, 'dist')))
-app.get('/(.*)', fallbackLimiter, (_, res) => {
+app.use(fallbackLimiter, (_, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 

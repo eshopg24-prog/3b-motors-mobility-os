@@ -231,8 +231,10 @@ function DashboardLayout({ role, setRole, children }: { role: UserRole; setRole:
     { to: '/inventory-os/warehouses', label: 'Warehouses', icon: <Home className="h-4 w-4" /> },
     { to: '/inventory-os/dealers', label: 'Dealers', icon: <Users className="h-4 w-4" /> },
     { to: '/inventory-os/reports', label: 'Reports', icon: <Gauge className="h-4 w-4" /> },
-    { to: '/admin/bulk-upload', label: 'Bulk Upload', icon: <UploadMark /> },
   ]
+  if (role === 'admin') {
+    inventoryItems.push({ to: '/admin/bulk-upload', label: 'Bulk Upload', icon: <UploadMark /> })
+  }
 
   const isCustomer = role === 'customer'
   return (
@@ -941,7 +943,7 @@ function InventoryShell({ role, setRole }: { role: UserRole; setRole: (role: Use
 
 function AdminShell({ role, setRole }: { role: UserRole; setRole: (role: UserRole) => void }) {
   return (
-    <RequireRole role={role} allowed={['inventory_manager', 'admin']}>
+    <RequireRole role={role} allowed={['admin']}>
       <DashboardLayout role={role} setRole={setRole}>
         <Outlet />
       </DashboardLayout>
