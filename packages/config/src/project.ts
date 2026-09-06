@@ -42,7 +42,7 @@ export type PlatformPhase = {
 export const PLATFORM_PHASES: readonly PlatformPhase[] = [
   { number: 0, name: "Starter App and Project Identity", status: "inspectionRequired", productionBlocking: true },
   { number: 1, name: "Architecture Blueprint", status: "inspectionRequired", productionBlocking: true },
-  { number: 2, name: "Design System and App Shell", status: "building", productionBlocking: true },
+  { number: 2, name: "Design System and App Shell", status: "inspectionRequired", productionBlocking: true },
   { number: 3, name: "Identity, RBAC, RLS, FLS, Audit, Security", status: "notStarted", productionBlocking: true },
   { number: 4, name: "Public Website and Homepage", status: "notStarted", productionBlocking: true },
   { number: 5, name: "Vehicle and Product Catalog", status: "notStarted", productionBlocking: true },
