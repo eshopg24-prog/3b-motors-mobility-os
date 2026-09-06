@@ -85,3 +85,12 @@ Every PR must include:
 - known gaps
 - rollback notes
 - production risks
+
+## Base44 dev environment
+
+- Run with `docker compose -f docker-compose.base44.yml up -d`.
+- Single service: `web` — a `node:22-bookworm-slim` container with the repo bind-mounted at `/app`, pnpm installed via corepack, deps installed on boot, and `next dev --turbo -H 0.0.0.0` as the live-reload dev command.
+- No database, API, or external credentials — Phase 0 is a self-contained Next.js starter. No secrets are required to boot.
+- Next.js `allowedDevOrigins` is derived from `BASE44_PUBLIC_HOST_SUFFIX` in `apps/web/next.config.mjs` so the preview origin can reach dev assets/HMR.
+- Preview entry point is host port 3000; health check path is `/`.
+- Verify the app is live with: `curl -sf -H "Host: external-preview.example.com" http://localhost:3000/`.
