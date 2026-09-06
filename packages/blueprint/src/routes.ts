@@ -110,6 +110,15 @@ export const routeRegistry: readonly RouteDefinition[] = [
     publicSafe: false
   },
   {
+    path: "/design-system",
+    label: "Design System and App Shell",
+    workspace: "blueprint",
+    accessLevel: "protected",
+    requiredPermission: "blueprint.view",
+    phase: 2,
+    publicSafe: false
+  },
+  {
     path: "/",
     label: "Public Homepage",
     workspace: "publicWebsite",
