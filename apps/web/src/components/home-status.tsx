@@ -1,7 +1,9 @@
 import { PLATFORM_PHASES, PROJECT_IDENTITY } from "@3bm/config";
 
 export function HomeStatus() {
-  const activePhase = PLATFORM_PHASES.find((phase) => phase.status !== "notStarted");
+  const activePhase = [...PLATFORM_PHASES]
+    .reverse()
+    .find((phase) => phase.status !== "notStarted");
 
   return (
     <section className="home-status-grid">
@@ -23,21 +25,22 @@ export function HomeStatus() {
           </div>
         </dl>
       </article>
+
       <article className="info-panel">
-        <p className="eyebrow">Current Phase</p>
+        <p className="eyebrow">Current Build Branch Phase</p>
         <h2>{activePhase?.name ?? "No active phase"}</h2>
         <p>
-          Phase 0 creates only the starter app, project identity, status screen,
-          repository rules, and production-not-ready guardrail.
+          Phase 1 defines typed architecture registries and blueprint views only.
+          It does not activate runtime authorization, business workflows, or production readiness.
         </p>
       </article>
+
       <article className="info-panel warning-panel">
         <p className="eyebrow">Locked Scope</p>
         <h2>Business modules not started</h2>
         <p>
-          Public website, catalog, inventory, finance, logistics, service,
-          dealer, fleet, integrations, and AI modules are intentionally excluded
-          from Phase 0.
+          Public commerce, catalog CRUD, inventory mutations, finance operations,
+          logistics execution, procurement execution, integrations, and AI runtime remain locked.
         </p>
       </article>
     </section>
