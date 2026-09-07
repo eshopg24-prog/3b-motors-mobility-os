@@ -290,6 +290,234 @@ dd {
   margin-bottom: 12px;
 }
 
+.blueprint-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.blueprint-sidebar {
+  background: rgba(5, 9, 15, 0.94);
+  border-right: 1px solid var(--steel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: 100vh;
+  padding: 24px;
+  position: sticky;
+  top: 0;
+}
+
+.blueprint-sidebar nav {
+  display: grid;
+  gap: 8px;
+}
+
+.blueprint-nav-link {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--muted-text);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+.blueprint-nav-link:hover,
+.blueprint-nav-link:focus-visible {
+  background: rgba(227, 27, 35, 0.08);
+  border-color: rgba(227, 27, 35, 0.25);
+  color: var(--white);
+  outline: none;
+}
+
+.blueprint-main {
+  min-width: 0;
+  padding: 32px;
+}
+
+.blueprint-header {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.blueprint-header h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  margin-bottom: 16px;
+}
+
+.blueprint-header p {
+  color: var(--muted-text);
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+.blueprint-access-warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  color: var(--soft-white) !important;
+  margin-top: 16px;
+  padding: 12px 14px;
+}
+
+.blueprint-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.blueprint-card,
+.blueprint-panel,
+.workflow-card {
+  background: rgba(16, 27, 42, 0.76);
+  border: 1px solid var(--steel-border);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.blueprint-card span {
+  color: var(--muted-text);
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.blueprint-card strong {
+  color: var(--white);
+  display: block;
+  font-size: 40px;
+  margin-top: 8px;
+}
+
+.blueprint-panel {
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.blueprint-panel.wide,
+.wide {
+  grid-column: 1 / -1;
+}
+
+.danger-panel {
+  border-color: rgba(239, 68, 68, 0.42);
+}
+
+.blueprint-table {
+  display: grid;
+  overflow-x: auto;
+}
+
+.table-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(29, 43, 58, 0.8);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  min-width: 920px;
+  padding: 14px 0;
+}
+
+.table-row.cols-4 {
+  grid-template-columns: 1.2fr 1.2fr 0.7fr 2fr;
+}
+
+.table-row:last-child {
+  border-bottom: 0;
+}
+
+.table-head {
+  color: var(--soft-white);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.table-row span {
+  color: var(--muted-text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.table-row .mono,
+.mono {
+  color: var(--white);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.blueprint-list {
+  color: var(--muted-text);
+  display: grid;
+  gap: 10px;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.blueprint-list.columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workflow-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.workflow-card h3 {
+  font-size: 22px;
+  margin: 8px 0;
+}
+
+.workflow-card p {
+  color: var(--muted-text);
+}
+
+.state-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.state-list span {
+  background: rgba(29, 143, 255, 0.1);
+  border: 1px solid rgba(29, 143, 255, 0.28);
+  border-radius: 999px;
+  color: var(--soft-white);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+@media (max-width: 980px) {
+  .blueprint-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .blueprint-sidebar {
+    height: auto;
+    position: relative;
+  }
+
+  .blueprint-sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .blueprint-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .blueprint-list.columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .home-status-grid,
   .phase-grid {
@@ -298,5 +526,16 @@ dd {
 
   .hero-card {
     padding: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .blueprint-main,
+  .blueprint-sidebar {
+    padding: 18px;
+  }
+
+  .blueprint-sidebar nav {
+    grid-template-columns: 1fr;
   }
 }

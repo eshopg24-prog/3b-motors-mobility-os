@@ -1,0 +1,50 @@
+export const securityEventRegistry = [
+  "access.denied",
+  "route.denied",
+  "permission.denied",
+  "ownership.violation",
+  "organization.missing",
+  "organization.mismatch",
+  "inactiveUser.blocked",
+  "suspendedUser.blocked",
+  "publicPrivateField.blocked",
+  "identifierLookup.restricted",
+  "export.denied",
+  "integration.secretExposure.blocked",
+  "webhook.signature.invalid",
+  "ai.access.denied"
+] as const;
+
+export const publicForbiddenFields = [
+  "internalCost",
+  "supplierCost",
+  "costPrice",
+  "landedCost",
+  "margin",
+  "marginPercent",
+  "supplierId",
+  "supplierName",
+  "supplierContact",
+  "supplierRisk",
+  "warehouseId",
+  "storageLocationId",
+  "exactInternalStock",
+  "reorderLevel",
+  "privateNotes",
+  "approvalNotes",
+  "staffNotes",
+  "fraudScore",
+  "internalRiskScore",
+  "auditMetadata",
+  "securityMetadata",
+  "paymentToken",
+  "integrationCredential",
+  "fullVin",
+  "fullChassisNumber",
+  "fullEngineSerial",
+  "fullBatterySerial",
+  "fullControllerSerial",
+  "fullGpsSerial"
+] as const;
+
+export type SecurityEventKey = (typeof securityEventRegistry)[number];
