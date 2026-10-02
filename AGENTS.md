@@ -85,3 +85,12 @@ Every PR must include:
 - known gaps
 - rollback notes
 - production risks
+
+## Base44 dev environment
+
+- Run with `docker compose -f docker-compose.base44.yml up -d` (Node 22 + pnpm via corepack, source bind-mounted, `next dev --turbo` on port 3000).
+- No lockfile was committed originally; `pnpm install` generates `pnpm-lock.yaml` on first boot.
+- `next build` requires `NODE_ENV=production` — do NOT set `NODE_ENV=development` in the container environment or the production build fails with `<Html> should not be imported outside of pages/_document` during static page generation. The dev server sets it automatically.
+- Next.js 15.5 App Router requires an explicit `src/app/not-found.tsx` entry; without it `next build` fails with `Invariant: no direct app page entry found for /_not-found`.
+- `allowedDevOrigins` in `next.config.mjs` references `BASE44_PUBLIC_HOST_SUFFIX` so the preview origin is accepted for dev assets/HMR.
+- Verify: `curl localhost:3000/` returns 200 with `<h1>3B Motors MOS</h1>`; `pnpm build` and `pnpm typecheck` both pass.

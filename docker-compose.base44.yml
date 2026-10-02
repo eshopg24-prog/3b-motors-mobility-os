@@ -1,0 +1,23 @@
+services:
+  web:
+    image: node:22
+    working_dir: /app
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS}
+    volumes:
+      - ./:/app
+      - web_pnpm_store:/root/.local/share/pnpm/store
+    command: ["sh", "-ec", "corepack enable pnpm && pnpm install && exec pnpm dev"]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+
+volumes:
+  web_pnpm_store:
