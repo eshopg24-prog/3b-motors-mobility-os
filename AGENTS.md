@@ -85,3 +85,14 @@ Every PR must include:
 - known gaps
 - rollback notes
 - production risks
+
+## Base44 dev environment
+
+- Run with: `docker compose -f docker-compose.base44.yml up -d`
+- Preview is at port 3000. Health check: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/`
+- Stack: pnpm 9.12.0 workspace monorepo, Next.js 15 + Turbopack (apps/web), no backend or database in Phase 0.
+- No lockfile was committed originally; `pnpm install --no-frozen-lockfile` generates one on first boot. A `pnpm-lock.yaml` is produced inside the container.
+- Next.js auto-modifies `apps/web/tsconfig.json` on first dev run (adds `incremental` and `esModuleInterop`) and regenerates `apps/web/next-env.d.ts`. These are standard Next.js behaviors, not manual edits.
+- The root `dev` script (`pnpm --filter @3bm/web dev`) does not accept extra CLI flags cleanly — the `--` separator gets passed through as a literal arg to `next dev`. To pass hostname/port, run `pnpm --filter @3bm/web exec next dev --turbo --hostname 0.0.0.0 --port 3000` instead.
+- `allowedDevOrigins` in `apps/web/next.config.mjs` is set from `BASE44_PUBLIC_HOST_SUFFIX` so the preview origin can access dev assets and HMR.
+- No secrets required for Phase 0.
